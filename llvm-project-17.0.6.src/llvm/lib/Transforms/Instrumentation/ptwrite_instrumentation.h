@@ -1,0 +1,269 @@
+
+#ifndef PTWR_INSTR_H
+#define PTWR_INSTR_H
+
+#include <stddef.h>
+
+// Perform left shift by LSH.
+constexpr size_t LSH = 56;
+
+constexpr uint64_t SHL = 48;
+
+enum {
+  PTW_FUNC_ENTRY = 1,
+  PTW_FUNC_EXIT,
+  PTW_IGNORE_THREAD_BEGIN,
+  PTW_IGNORE_THREAD_END,
+  // Access Types
+  PTW_READ1,
+  PTW_READ2,
+  PTW_READ4,
+  PTW_READ8,
+  PTW_READ16,
+  PTW_WRITE1,
+  PTW_WRITE2,
+  PTW_WRITE4,
+  PTW_WRITE8,
+  PTW_WRITE16,
+  PTW_UNALIGNED_READ1,
+  PTW_UNALIGNED_READ2,
+  PTW_UNALIGNED_READ4,
+  PTW_UNALIGNED_READ8,
+  PTW_UNALIGNED_READ16,
+  PTW_UNALIGNED_WRITE1,
+  PTW_UNALIGNED_WRITE2,
+  PTW_UNALIGNED_WRITE4,
+  PTW_UNALIGNED_WRITE8,
+  PTW_UNALIGNED_WRITE16,
+  PTW_VOLATILE_READ1,
+  PTW_VOLATILE_READ2,
+  PTW_VOLATILE_READ4,
+  PTW_VOLATILE_READ8,
+  PTW_VOLATILE_READ16,
+  PTW_VOLATILE_WRITE1,
+  PTW_VOLATILE_WRITE2,
+  PTW_VOLATILE_WRITE4,
+  PTW_VOLATILE_WRITE8,
+  PTW_VOLATILE_WRITE16,
+  PTW_UNALIGNED_VOLATILE_READ1,
+  PTW_UNALIGNED_VOLATILE_READ2,
+  PTW_UNALIGNED_VOLATILE_READ4,
+  PTW_UNALIGNED_VOLATILE_READ8,
+  PTW_UNALIGNED_VOLATILE_READ16,
+  PTW_UNALIGNED_VOLATILE_WRITE1,
+  PTW_UNALIGNED_VOLATILE_WRITE2,
+  PTW_UNALIGNED_VOLATILE_WRITE4,
+  PTW_UNALIGNED_VOLATILE_WRITE8,
+  PTW_UNALIGNED_VOLATILE_WRITE16,
+  PTW_READ_WRITE1,
+  PTW_READ_WRITE2,
+  PTW_READ_WRITE4,
+  PTW_READ_WRITE8,
+  PTW_READ_WRITE16,
+  PTW_UNALIGNED_READ_WRITE1,
+  PTW_UNALIGNED_READ_WRITE2,
+  PTW_UNALIGNED_READ_WRITE4,
+  PTW_UNALIGNED_READ_WRITE8,
+  PTW_UNALIGNED_READ_WRITE16,
+  PTW_VPTR_READ,
+  PTW_VPTR_WRITE,
+  PTW_ATOMIC8_LOAD,
+  PTW_ATOMIC16_LOAD,
+  PTW_ATOMIC32_LOAD,
+  PTW_ATOMIC64_LOAD,
+  PTW_ATOMIC128_LOAD,
+  PTW_ATOMIC8_STORE,
+  PTW_ATOMIC16_STORE,
+  PTW_ATOMIC32_STORE,
+  PTW_ATOMIC64_STORE,
+  PTW_ATOMIC128_STORE,
+  PTW_ATOMIC8_RMW,
+  PTW_ATOMIC16_RMW,
+  PTW_ATOMIC32_RMW,
+  PTW_ATOMIC64_RMW,
+  PTW_ATOMIC128_RMW,
+  PTW_ATOMIC8_CMPXCHG,
+  PTW_ATOMIC16_CMPXCHG,
+  PTW_ATOMIC32_CMPXCHG,
+  PTW_ATOMIC64_CMPXCHG,
+  PTW_ATOMIC128_CMPXCHG,
+  // Pthread Interceptors
+  PTW_THREAD_START,
+  PTW_PTHREAD_CREATE,
+  PTW_PTHREAD_JOIN,
+  PTW_PTHREAD_DETACH,
+  PTW_PTHREAD_EXIT,
+  PTW_PTHREAD_TRYJOIN_NP,
+  PTW_PTHREAD_TIMEDJOIN_NP,
+  PTW_PTHREAD_COND_INIT,
+  PTW_PTHREAD_COND_SIGNAL,
+  PTW_PTHREAD_COND_BROADCAST,
+  PTW_PTHREAD_COND_DESTROY,
+  PTW_PTHREAD_MUTEX_INIT,
+  PTW_PTHREAD_MUTEX_DESTROY,
+  PTW_PTHREAD_MUTEX_TRYLOCK,
+  PTW_PTHREAD_MUTEX_TIMEDLOCK,
+  PTW_PTHREAD_SPIN_INIT,
+  PTW_PTHREAD_SPIN_DESTROY,
+  PTW_PTHREAD_SPIN_LOCK,
+  PTW_PTHREAD_SPIN_TRYLOCK,
+  PTW_PTHREAD_SPIN_UNLOCK,
+  PTW_PTHREAD_RWLOCK_INIT,
+  PTW_PTHREAD_RWLOCK_DESTROY,
+  PTW_PTHREAD_RWLOCK_RDLOCK,
+  PTW_PTHREAD_RWLOCK_TRYRDLOCK,
+  PTW_PTHREAD_RWLOCK_TIMEDRDLOCK,
+  PTW_PTHREAD_RWLOCK_WRLOCK,
+  PTW_PTHREAD_RWLOCK_TRYWRLOCK,
+  PTW_PTHREAD_RWLOCK_TIMEDWRLOCK,
+  PTW_PTHREAD_RWLOCK_UNLOCK,
+  PTW_PTHREAD_BARRIER_INIT,
+  PTW_PTHREAD_BARRIER_DESTROY,
+  PTW_PTHREAD_BARRIER_WAIT,
+  PTW_PTHREAD_SIGMASK,
+  PTW_PTHREAD_KILL,
+  // Common Interceptors
+  PTW_PTHREAD_MUTEX_LOCK,
+  PTW_PTHREAD_MUTEX_UNLOCK,
+  PTW___PTHREAD_MUTEX_LOCK,
+  PTW___PTHREAD_MUTEX_UNLOCK,
+};
+
+static const uint64_t PTW_FUNC_ENTRY_MASK = (uint64_t)PTW_FUNC_ENTRY << LSH;
+static const uint64_t FUNC_EXIT  = (uint64_t)PTW_FUNC_EXIT << LSH;
+
+static const uint64_t PTW_IGNORE_THREAD_BEGIN_MASK = (uint64_t)PTW_IGNORE_THREAD_BEGIN << LSH;
+static const uint64_t PTW_IGNORE_THREAD_END_MASK   = (uint64_t)PTW_IGNORE_THREAD_END << LSH;
+
+constexpr uint64_t PTW_READ1_MASK   = static_cast<uint64_t>(PTW_READ1)  << LSH;
+constexpr uint64_t PTW_READ2_MASK   = static_cast<uint64_t>(PTW_READ2)  << LSH;
+constexpr uint64_t PTW_READ4_MASK   = static_cast<uint64_t>(PTW_READ4)  << LSH;
+constexpr uint64_t PTW_READ8_MASK   = static_cast<uint64_t>(PTW_READ8)  << LSH;
+constexpr uint64_t PTW_READ16_MASK  = static_cast<uint64_t>(PTW_READ16) << LSH;
+
+constexpr uint64_t PTW_WRITE1_MASK   = static_cast<uint64_t>(PTW_WRITE1)  << LSH;
+constexpr uint64_t PTW_WRITE2_MASK   = static_cast<uint64_t>(PTW_WRITE2)  << LSH;
+constexpr uint64_t PTW_WRITE4_MASK   = static_cast<uint64_t>(PTW_WRITE4)  << LSH;
+constexpr uint64_t PTW_WRITE8_MASK   = static_cast<uint64_t>(PTW_WRITE8)  << LSH;
+constexpr uint64_t PTW_WRITE16_MASK  = static_cast<uint64_t>(PTW_WRITE16) << LSH;
+
+constexpr uint64_t PTW_UNALIGNED_READ1_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ1)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ2_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ2)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ4_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ4)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ8_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ8)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ16_MASK  = static_cast<uint64_t>(PTW_UNALIGNED_READ16) << LSH;
+
+constexpr uint64_t PTW_UNALIGNED_WRITE1_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_WRITE1)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_WRITE2_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_WRITE2)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_WRITE4_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_WRITE4)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_WRITE8_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_WRITE8)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_WRITE16_MASK  = static_cast<uint64_t>(PTW_UNALIGNED_WRITE16) << LSH;
+
+constexpr uint64_t PTW_VOLATILE_READ1_MASK   = static_cast<uint64_t>(PTW_VOLATILE_READ1)  << LSH;
+constexpr uint64_t PTW_VOLATILE_READ2_MASK   = static_cast<uint64_t>(PTW_VOLATILE_READ2)  << LSH;
+constexpr uint64_t PTW_VOLATILE_READ4_MASK   = static_cast<uint64_t>(PTW_VOLATILE_READ4)  << LSH;
+constexpr uint64_t PTW_VOLATILE_READ8_MASK   = static_cast<uint64_t>(PTW_VOLATILE_READ8)  << LSH;
+constexpr uint64_t PTW_VOLATILE_READ16_MASK  = static_cast<uint64_t>(PTW_VOLATILE_READ16) << LSH;
+
+constexpr uint64_t PTW_VOLATILE_WRITE1_MASK   = static_cast<uint64_t>(PTW_VOLATILE_WRITE1)  << LSH;
+constexpr uint64_t PTW_VOLATILE_WRITE2_MASK   = static_cast<uint64_t>(PTW_VOLATILE_WRITE2)  << LSH;
+constexpr uint64_t PTW_VOLATILE_WRITE4_MASK   = static_cast<uint64_t>(PTW_VOLATILE_WRITE4)  << LSH;
+constexpr uint64_t PTW_VOLATILE_WRITE8_MASK   = static_cast<uint64_t>(PTW_VOLATILE_WRITE8)  << LSH;
+constexpr uint64_t PTW_VOLATILE_WRITE16_MASK  = static_cast<uint64_t>(PTW_VOLATILE_WRITE16) << LSH;
+
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_READ1_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_READ1)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_READ2_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_READ2)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_READ4_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_READ4)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_READ8_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_READ8)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_READ16_MASK  = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_READ16) << LSH;
+
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_WRITE1_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_WRITE1)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_WRITE2_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_WRITE2)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_WRITE4_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_WRITE4)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_WRITE8_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_WRITE8)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_VOLATILE_WRITE16_MASK  = static_cast<uint64_t>(PTW_UNALIGNED_VOLATILE_WRITE16) << LSH;
+
+constexpr uint64_t PTW_READ_WRITE1_MASK   = static_cast<uint64_t>(PTW_READ_WRITE1)  << LSH;
+constexpr uint64_t PTW_READ_WRITE2_MASK   = static_cast<uint64_t>(PTW_READ_WRITE2)  << LSH;
+constexpr uint64_t PTW_READ_WRITE4_MASK   = static_cast<uint64_t>(PTW_READ_WRITE4)  << LSH;
+constexpr uint64_t PTW_READ_WRITE8_MASK   = static_cast<uint64_t>(PTW_READ_WRITE8)  << LSH;
+constexpr uint64_t PTW_READ_WRITE16_MASK  = static_cast<uint64_t>(PTW_READ_WRITE16) << LSH;
+
+constexpr uint64_t PTW_UNALIGNED_READ_WRITE1_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ_WRITE1)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ_WRITE2_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ_WRITE2)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ_WRITE4_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ_WRITE4)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ_WRITE8_MASK   = static_cast<uint64_t>(PTW_UNALIGNED_READ_WRITE8)  << LSH;
+constexpr uint64_t PTW_UNALIGNED_READ_WRITE16_MASK  = static_cast<uint64_t>(PTW_UNALIGNED_READ_WRITE16) << LSH;
+
+constexpr uint64_t PTW_VPTR_READ_MASK  = static_cast<uint64_t>(PTW_VPTR_READ)  << LSH;
+constexpr uint64_t PTW_VPTR_WRITE_MASK = static_cast<uint64_t>(PTW_VPTR_WRITE) << LSH;
+
+constexpr uint64_t PTW_ATOMIC8_LOAD_MASK    = static_cast<uint64_t>(PTW_ATOMIC8_LOAD)   << LSH;
+constexpr uint64_t PTW_ATOMIC16_LOAD_MASK   = static_cast<uint64_t>(PTW_ATOMIC16_LOAD)  << LSH;
+constexpr uint64_t PTW_ATOMIC32_LOAD_MASK   = static_cast<uint64_t>(PTW_ATOMIC32_LOAD)  << LSH;
+constexpr uint64_t PTW_ATOMIC64_LOAD_MASK   = static_cast<uint64_t>(PTW_ATOMIC64_LOAD)  << LSH;
+constexpr uint64_t PTW_ATOMIC128_LOAD_MASK  = static_cast<uint64_t>(PTW_ATOMIC128_LOAD) << LSH;
+
+constexpr uint64_t PTW_ATOMIC8_STORE_MASK    = static_cast<uint64_t>(PTW_ATOMIC8_STORE)   << LSH;
+constexpr uint64_t PTW_ATOMIC16_STORE_MASK   = static_cast<uint64_t>(PTW_ATOMIC16_STORE)  << LSH;
+constexpr uint64_t PTW_ATOMIC32_STORE_MASK   = static_cast<uint64_t>(PTW_ATOMIC32_STORE)  << LSH;
+constexpr uint64_t PTW_ATOMIC64_STORE_MASK   = static_cast<uint64_t>(PTW_ATOMIC64_STORE)  << LSH;
+constexpr uint64_t PTW_ATOMIC128_STORE_MASK  = static_cast<uint64_t>(PTW_ATOMIC128_STORE) << LSH;
+
+constexpr uint64_t PTW_ATOMIC8_RMW_MASK    = static_cast<uint64_t>(PTW_ATOMIC8_RMW)   << LSH;
+constexpr uint64_t PTW_ATOMIC16_RMW_MASK   = static_cast<uint64_t>(PTW_ATOMIC16_RMW)  << LSH;
+constexpr uint64_t PTW_ATOMIC32_RMW_MASK   = static_cast<uint64_t>(PTW_ATOMIC32_RMW)  << LSH;
+constexpr uint64_t PTW_ATOMIC64_RMW_MASK   = static_cast<uint64_t>(PTW_ATOMIC64_RMW)  << LSH;
+constexpr uint64_t PTW_ATOMIC128_RMW_MASK  = static_cast<uint64_t>(PTW_ATOMIC128_RMW) << LSH;
+
+constexpr uint64_t PTW_ATOMIC8_CMPXCHG_MASK    = static_cast<uint64_t>(PTW_ATOMIC8_CMPXCHG)   << LSH;
+constexpr uint64_t PTW_ATOMIC16_CMPXCHG_MASK   = static_cast<uint64_t>(PTW_ATOMIC16_CMPXCHG)  << LSH;
+constexpr uint64_t PTW_ATOMIC32_CMPXCHG_MASK   = static_cast<uint64_t>(PTW_ATOMIC32_CMPXCHG)  << LSH;
+constexpr uint64_t PTW_ATOMIC64_CMPXCHG_MASK   = static_cast<uint64_t>(PTW_ATOMIC64_CMPXCHG)  << LSH;
+constexpr uint64_t PTW_ATOMIC128_CMPXCHG_MASK  = static_cast<uint64_t>(PTW_ATOMIC128_CMPXCHG) << LSH;
+
+// __tmon_thread_start_func
+constexpr uint64_t THREAD_START_MASK = static_cast<uint64_t>(PTW_THREAD_START) << LSH;
+
+// Pthread Interceptors
+constexpr uint64_t PTHREAD_CREATE = static_cast<uint64_t>(PTW_PTHREAD_CREATE) << LSH;
+constexpr uint64_t PTHREAD_JOIN = static_cast<uint64_t>(PTW_PTHREAD_JOIN)  << LSH;
+constexpr uint64_t PTHREAD_DETACH = static_cast<uint64_t>(PTW_PTHREAD_DETACH)  << LSH;
+constexpr uint64_t PTHREAD_EXIT = static_cast<uint64_t>(PTW_PTHREAD_EXIT)  << LSH;
+constexpr uint64_t PTHREAD_TRYJOIN_NP = static_cast<uint64_t>(PTW_PTHREAD_TRYJOIN_NP)  << LSH;
+constexpr uint64_t PTHREAD_TIMEDJOIN_NP = static_cast<uint64_t>(PTW_PTHREAD_TIMEDJOIN_NP)  << LSH;
+constexpr uint64_t PTHREAD_COND_INIT = static_cast<uint64_t>(PTW_PTHREAD_COND_INIT)  << LSH;
+constexpr uint64_t PTHREAD_COND_SIGNAL = static_cast<uint64_t>(PTW_PTHREAD_COND_SIGNAL)  << LSH;
+constexpr uint64_t PTHREAD_COND_BROADCAST = static_cast<uint64_t>(PTW_PTHREAD_COND_BROADCAST)  << LSH;
+constexpr uint64_t PTHREAD_COND_DESTROY = static_cast<uint64_t>(PTW_PTHREAD_COND_DESTROY)  << LSH;
+constexpr uint64_t PTHREAD_MUTEX_INIT = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_INIT)  << LSH;
+constexpr uint64_t PTHREAD_MUTEX_DESTROY = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_DESTROY)  << LSH;
+constexpr uint64_t PTHREAD_MUTEX_TRYLOCK = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_TRYLOCK) << LSH;
+constexpr uint64_t PTHREAD_MUTEX_TIMEDLOCK = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_TIMEDLOCK) << LSH;
+constexpr uint64_t PTHREAD_SPIN_INIT = static_cast<uint64_t>(PTW_PTHREAD_SPIN_INIT) << LSH;
+constexpr uint64_t PTHREAD_SPIN_DESTROY = static_cast<uint64_t>(PTW_PTHREAD_SPIN_DESTROY) << LSH;
+constexpr uint64_t PTHREAD_SPIN_LOCK = static_cast<uint64_t>(PTW_PTHREAD_SPIN_LOCK) << LSH;
+constexpr uint64_t PTHREAD_SPIN_TRYLOCK = static_cast<uint64_t>(PTW_PTHREAD_SPIN_TRYLOCK) << LSH;
+constexpr uint64_t PTHREAD_SPIN_UNLOCK = static_cast<uint64_t>(PTW_PTHREAD_SPIN_UNLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_INIT = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_INIT) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_DESTROY = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_DESTROY) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_RDLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_RDLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_TRYRDLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_TRYRDLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_TIMEDRDLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_TIMEDRDLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_WRLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_WRLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_TRYWRLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_TRYWRLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_TIMEDWRLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_TIMEDWRLOCK) << LSH;
+constexpr uint64_t PTHREAD_RWLOCK_UNLOCK = static_cast<uint64_t>(PTW_PTHREAD_RWLOCK_UNLOCK) << LSH;
+constexpr uint64_t PTHREAD_BARRIER_INIT = static_cast<uint64_t>(PTW_PTHREAD_BARRIER_INIT) << LSH;
+constexpr uint64_t PTHREAD_BARRIER_DESTROY = static_cast<uint64_t>(PTW_PTHREAD_BARRIER_DESTROY) << LSH;
+constexpr uint64_t PTHREAD_BARRIER_WAIT = static_cast<uint64_t>(PTW_PTHREAD_BARRIER_WAIT) << LSH;
+constexpr uint64_t PTHREAD_SIGMASK = static_cast<uint64_t>(PTW_PTHREAD_SIGMASK) << LSH;
+constexpr uint64_t PTHREAD_KILL = static_cast<uint64_t>(PTW_PTHREAD_KILL) << LSH;
+
+// Common Interceptors
+constexpr uint64_t PTHREAD_MUTEX_LOCK = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_LOCK) << LSH;
+constexpr uint64_t PTHREAD_MUTEX_UNLOCK = static_cast<uint64_t>(PTW_PTHREAD_MUTEX_UNLOCK) << LSH;
+constexpr uint64_t __PTHREAD_MUTEX_LOCK = static_cast<uint64_t>(PTW___PTHREAD_MUTEX_LOCK) << LSH;
+constexpr uint64_t __PTHREAD_MUTEX_UNLOCK = static_cast<uint64_t>(PTW___PTHREAD_MUTEX_UNLOCK) << LSH;
+
+#endif /* PTWR_INSTR_H */
