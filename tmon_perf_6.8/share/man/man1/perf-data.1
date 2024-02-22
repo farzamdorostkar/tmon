@@ -1,0 +1,84 @@
+'\" t
+.\"     Title: perf-data
+.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 2024-02-01
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-DATA" "1" "2024\-02\-01" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-data \- Data file related processing
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf data\fR [<common options>] <command> [<options>]",
+.fi
+.SH "DESCRIPTION"
+.sp
+Data file related processing\&.
+.SH "COMMANDS"
+.PP
+convert
+.RS 4
+Converts perf data file into another format\&. It\(cqs possible to set data\-convert debug variable to get debug messages from conversion, like: perf \-\-debug data\-convert data convert \&...
+.RE
+.SH "OPTIONS FOR \FICONVERT\FR"
+.PP
+\-\-to\-ctf
+.RS 4
+Triggers the CTF conversion, specify the path of CTF data directory\&.
+.RE
+.PP
+\-\-to\-json
+.RS 4
+Triggers JSON conversion\&. Specify the JSON filename to output\&.
+.RE
+.PP
+\-\-tod
+.RS 4
+Convert time to wall clock time\&.
+.RE
+.PP
+\-i
+.RS 4
+Specify input perf data file path\&.
+.RE
+.PP
+\-f, \-\-force
+.RS 4
+Don\(cqt complain, do it\&.
+.RE
+.PP
+\-v, \-\-verbose
+.RS 4
+Be more verbose (show counter open errors, etc)\&.
+.RE
+.PP
+\-\-all
+.RS 4
+Convert all events, including non\-sample events (comm, fork, \&...), to output\&. Default is off, only convert samples\&.
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf\fR(1) [1] Common Trace Format \- \m[blue]\fBhttp://www\&.efficios\&.com/ctf\fR\m[]

@@ -1,0 +1,1 @@
+cmd_arch/x86/tests/perf-in.o :=  ld   -r -o arch/x86/tests/perf-in.o  arch/x86/tests/regs_load.o arch/x86/tests/dwarf-unwind.o arch/x86/tests/arch-tests.o arch/x86/tests/sample-parsing.o arch/x86/tests/hybrid.o arch/x86/tests/intel-pt-test.o arch/x86/tests/bp-modify.o arch/x86/tests/amd-ibs-via-core-pmu.o

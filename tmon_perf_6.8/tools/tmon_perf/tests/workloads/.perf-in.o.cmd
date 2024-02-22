@@ -1,0 +1,1 @@
+cmd_tests/workloads/perf-in.o :=  ld   -r -o tests/workloads/perf-in.o  tests/workloads/noploop.o tests/workloads/thloop.o tests/workloads/leafloop.o tests/workloads/sqrtloop.o tests/workloads/brstack.o tests/workloads/datasym.o

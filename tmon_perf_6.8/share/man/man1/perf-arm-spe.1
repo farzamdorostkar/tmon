@@ -1,0 +1,363 @@
+'\" t
+.\"     Title: perf-arm-spe
+.\"    Author: [FIXME: author] [see http://www.docbook.org/tdg5/en/html/author]
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 2024-02-01
+.\"    Manual: perf Manual
+.\"    Source: perf
+.\"  Language: English
+.\"
+.TH "PERF\-ARM\-SPE" "1" "2024\-02\-01" "perf" "perf Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+perf-arm-spe \- Support for Arm Statistical Profiling Extension within Perf tools
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIperf record\fR \-e arm_spe//
+.fi
+.SH "DESCRIPTION"
+.sp
+The SPE (Statistical Profiling Extension) feature provides accurate attribution of latencies and events down to individual instructions\&. Rather than being interrupt\-driven, it picks an instruction to sample and then captures data for it during execution\&. Data includes execution time in cycles\&. For loads and stores it also includes data address, cache miss events, and data origin\&.
+.sp
+The sampling has 5 stages:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+Choose an operation
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+Collect data about the operation
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+Optionally discard the record based on a filter
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+Write the record to memory
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 5.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  5." 4.2
+.\}
+Interrupt when the buffer is full
+.RE
+.SS "Choose an operation"
+.sp
+This is chosen from a sample population, for SPE this is an IMPLEMENTATION DEFINED choice of all architectural instructions or all micro\-ops\&. Sampling happens at a programmable interval\&. The architecture provides a mechanism for the SPE driver to infer the minimum interval at which it should sample\&. This minimum interval is used by the driver if no interval is specified\&. A pseudo\-random perturbation is also added to the sampling interval by default\&.
+.SS "Collect data about the operation"
+.sp
+Program counter, PMU events, timings and data addresses related to the operation are recorded\&. Sampling ensures there is only one sampled operation is in flight\&.
+.SS "Optionally discard the record based on a filter"
+.sp
+Based on programmable criteria, choose whether to keep the record or discard it\&. If the record is discarded then the flow stops here for this sample\&.
+.SS "Write the record to memory"
+.sp
+The record is appended to a memory buffer
+.SS "Interrupt when the buffer is full"
+.sp
+When the buffer fills, an interrupt is sent and the driver signals Perf to collect the records\&. Perf saves the raw data in the perf\&.data file\&.
+.SH "OPENING THE FILE"
+.sp
+Up until this point no decoding of the SPE data was done by either the kernel or Perf\&. Only when the recorded file is opened with \fIperf report\fR or \fIperf script\fR does the decoding happen\&. When decoding the data, Perf generates "synthetic samples" as if these were generated at the time of the recording\&. These samples are the same as if normal sampling was done by Perf without using SPE, although they may have more attributes associated with them\&. For example a normal sample may have just the instruction pointer, but an SPE sample can have data addresses and latency attributes\&.
+.SH "WHY SAMPLING?"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Sampling, rather than tracing, cuts down the profiling problem to something more manageable for hardware\&. Only one sampled operation is in flight at a time\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Allows precise attribution data, including: Full PC of instruction, data virtual and physical addresses\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Allows correlation between an instruction and events, such as TLB and cache miss\&. (Data source indicates which particular cache was hit, but the meaning is implementation defined because different implementations can have different cache configurations\&.)
+.RE
+.sp
+However, SPE does not provide any call\-graph information, and relies on statistical methods\&.
+.SH "COLLISIONS"
+.sp
+When an operation is sampled while a previous sampled operation has not finished, a collision occurs\&. The new sample is dropped\&. Collisions affect the integrity of the data, so the sample rate should be set to avoid collisions\&.
+.sp
+The \fIsample_collision\fR PMU event can be used to determine the number of lost samples\&. Although this count is based on collisions \fIbefore\fR filtering occurs\&. Therefore this can not be used as an exact number for samples dropped that would have made it through the filter, but can be a rough guide\&.
+.SH "THE EFFECT OF MICROARCHITECTURAL SAMPLING"
+.sp
+If an implementation samples micro\-operations instead of instructions, the results of sampling must be weighted accordingly\&.
+.sp
+For example, if a given instruction A is always converted into two micro\-operations, A0 and A1, it becomes twice as likely to appear in the sample population\&.
+.sp
+The coarse effect of conversions, and, if applicable, sampling of speculative operations, can be estimated from the \fIsample_pop\fR and \fIinst_retired\fR PMU events\&.
+.SH "KERNEL REQUIREMENTS"
+.sp
+The ARM_SPE_PMU config must be set to build as either a module or statically\&.
+.sp
+Depending on CPU model, the kernel may need to be booted with page table isolation disabled (kpti=off)\&. If KPTI needs to be disabled, this will fail with a console message "profiling buffer inaccessible\&. Try passing \fIkpti=off\fR on the kernel command line"\&.
+.SH "CAPTURING SPE WITH PERF COMMAND\-LINE TOOLS"
+.sp
+You can record a session with SPE samples:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-e arm_spe// \-\- \&./mybench
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The sample period is set from the \-c option, and because the minimum interval is used by default it\(cqs recommended to set this to a higher value\&. The value is written to PMSIRR\&.INTERVAL\&.
+.SS "Config parameters"
+.sp
+These are placed between the // in the event and comma separated\&. For example \fI\-e arm_spe/load_filter=1,min_latency=10/\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+branch_filter=1     \- collect branches only (PMSFCR\&.B)
+event_filter=<mask> \- filter on specific events (PMSEVFR) \- see bitfield description below
+jitter=1            \- use jitter to avoid resonance when sampling (PMSIRR\&.RND)
+load_filter=1       \- collect loads only (PMSFCR\&.LD)
+min_latency=<n>     \- collect only samples with this latency or higher* (PMSLATFR)
+pa_enable=1         \- collect physical address (as well as VA) of loads/stores (PMSCR\&.PA) \- requires privilege
+pct_enable=1        \- collect physical timestamp instead of virtual timestamp (PMSCR\&.PCT) \- requires privilege
+store_filter=1      \- collect stores only (PMSFCR\&.ST)
+ts_enable=1         \- enable timestamping with value of generic timer (PMSCR\&.TS)
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+* Latency is the total latency from the point at which sampling started on that instruction, rather than only the execution latency\&.
+.sp
+Only some events can be filtered on; these include:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+bit 1     \- instruction retired (i\&.e\&. omit speculative instructions)
+bit 3     \- L1D refill
+bit 5     \- TLB refill
+bit 7     \- mispredict
+bit 11    \- misaligned access
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+So to sample just retired instructions:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-e arm_spe/event_filter=2/ \-\- \&./mybench
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+or just mispredicted branches:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf record \-e arm_spe/event_filter=0x80/ \-\- \&./mybench
+.fi
+.if n \{\
+.RE
+.\}
+.SS "Viewing the data"
+.sp
+By default perf report and perf script will assign samples to separate groups depending on the attributes/events of the SPE record\&. Because instructions can have multiple events associated with them, the samples in these groups are not necessarily unique\&. For example perf report shows these groups:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Available samples
+0 arm_spe//
+0 dummy:u
+21 l1d\-miss
+897 l1d\-access
+5 llc\-miss
+7 llc\-access
+2 tlb\-miss
+1K tlb\-access
+36 branch\-miss
+0 remote\-access
+900 memory
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The arm_spe// and dummy:u events are implementation details and are expected to be empty\&.
+.sp
+To get a full list of unique samples that are not sorted into groups, set the itrace option to generate \fIinstruction\fR samples\&. The period option is also taken into account, so set it to 1 instruction unless you want to further downsample the already sampled SPE data:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf report \-\-itrace=i1i
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+Memory access details are also stored on the samples and this can be viewed with:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+perf report \-\-mem\-mode
+.fi
+.if n \{\
+.RE
+.\}
+.SS "Common errors"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+"Cannot find PMU \(oqarm_spe\(cq\&. Missing kernel support?"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Module not built or loaded, KPTI not disabled (see above), or running on a VM
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+"Arm SPE CONTEXT packets not found in the traces\&."
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Root privilege is required to collect context packets\&. But these only increase the accuracy of
+assigning PIDs to kernel samples\&. For userspace sampling this can be ignored\&.
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Excessively large perf\&.data file size
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+Increase sampling interval (see above)
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.SH "SEE ALSO"
+.sp
+\fBperf-record\fR(1), \fBperf-script\fR(1), \fBperf-report\fR(1), \fBperf-inject\fR(1)
